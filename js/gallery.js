@@ -64,8 +64,15 @@ const images = [
     },
     ];
 
+const galleryList = document.querySelector('.gallery');
+
+galleryList.addEventListener('click', handleGalleryClick);
+
+galleryRender(images);
+
+function galleryRender(images) {
     const arrayOfImages = images.map(
-    ({preview, original, description}) => `<li class="gallery-item">
+        ({ preview, original, description }) => `<li class="gallery-item">
     <a
       class="gallery-link"
       href="${original}">
@@ -77,28 +84,33 @@ const images = [
       />
     </a>
   </li>`,
-  )
-  .join('');
-const gallery = document.querySelector('.gallery');
-gallery.insertAdjacentHTML('afterbegin', arrayOfImages);
+    )
+        .join('');
+  
 
-gallery.onclick = (e) => {
-  if (e.target.nodeName !== 'IMG') {
-    return;
-  }
-  e.preventDefault();
-  const img = e.target.dataset.source;
-  console.log(img);
-  const instance = basicLightbox.create(
-    `<img style="width: auto; height: auto" src="${img}">`,
+    galleryList.insertAdjacentHTML('afterbegin', arrayOfImages);
+};
+    
+ const instance = basicLightbox.create(
+      `<img class="modal-img" style="width: auto; height: auto" src="" alt="" />`,
+      {
+          onShow: instance => { document.addEventListener('keydown', handleKeydown); },
+
+          onClose: instance => { document.removeEventListener('keydown', handleKeydown); },
+      },
   );
-  instance.show();
+  
+function handleGalleryClick(e) {
+    e.preventDefault();
+    if (e.target.nodeName !== 'IMG') { return; }
 
-  const handleKeydown = (e) => {
-    if (e.key === 'Escape' && instance.visible()) {
-      instance.close();
-      document.removeEventListener('keydown', handleKeydown);
-    }
-  };
-  document.addEventListener('keydown', handleKeydown);
+    const modalImg = instance.element().querySelector('.modal-img');
+    modalImg.src = e.target.dataset.source;
+    modalImg.alt = e.target.alt;
+    instance.show();
+};
+
+  function handleKeydown (e) {
+      if (e.code === 'Escape') { instance.close(); }
+   
 };
